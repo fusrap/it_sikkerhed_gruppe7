@@ -1,63 +1,19 @@
 from socket import AF_INET, SOCK_STREAM, socket
 
-RESPONSE_404_NOT_FOUND_HEADER = 'HTTP/1.1 404 NOT FOUND\r\n'
+RESPONSE_404_NOT_FOUND_HEADER = 'HTTP/1.1 404 NOT FOUND\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n'
 RESPONSE_400_BAD_REQUEST = 'HTTP/1.1 400 BAD REQUEST\r\n'
-RESPONSE_200_OK_HEADER = 'HTTP/1.1 200 OK\r\n'
+RESPONSE_200_OK_HEADER = 'HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n'
 RESPONSE_301_MOVED_PERMANENTLY_HEADER = 'HTTP/1.1 301 Moved Permanently\r\nLocation: https://cdn-icons-png.flaticon.com/512/4784/4784738.png\r\n\r\n'
 
 
-PAGE_NOT_FOUND ="""
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>404 Not Found</title>
-</head>
-<body>
-    <h1>ERROR: 404 NOT FOUND</h1>
-</body>
-</html>
-"""
+with open('404.html', 'r', encoding='utf-8') as notFoundPage:
+    PAGE_NOT_FOUND = notFoundPage.read()
 
+with open('index.html', 'r', encoding='utf-8') as indexPage:
+    PAGE_HOME = indexPage.read()
 
-PAGE_HOME ="""
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome</title>
-</head>
-<header>
-    <h1>Home</h1>
-    <nav>
-        <p><a href="/myPage">Min side</a></p>
-    </nav>
-</header>
-<body>
-</body>
-</html>
-"""
-
-MY_PAGE ="""
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Page</title>
-</head>
-<body>
-    <header>
-        <h1>My Page</h1>
-        <nav>
-            <p><a href="/home">Hjem</a></p>
-        </nav>
-    </header>
-</body>
-</html>
-"""
+with open('my_page.html', 'r', encoding='utf-8') as myPage:
+    MY_PAGE = myPage.read()
 
 RESPONSE_404_NOT_FOUND_RESPONSE = RESPONSE_404_NOT_FOUND_HEADER + PAGE_NOT_FOUND
 
