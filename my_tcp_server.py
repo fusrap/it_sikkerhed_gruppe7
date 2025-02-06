@@ -1,5 +1,6 @@
 from socket import AF_INET, SOCK_STREAM, socket
 import re
+from datetime import datetime
 
 
 RESPONSE_404_NOT_FOUND_HEADER = 'HTTP/1.1 404 NOT FOUND\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n'
@@ -36,7 +37,7 @@ def serverSetup(port: int):
     print("The server is ready to receive")
     return server_socket
 
-def routing(url:str):
+def createResponse(url:str):
     try:
         routes = {
             '/': RESPONSE_200_OK_HEADER + PAGE_HOME,
@@ -48,6 +49,8 @@ def routing(url:str):
     except:
         return RESPONSE_404_NOT_FOUND_RESPONSE
     
+    # (response_text , code)
+
 
 def splitRequestLine(request_line):
     if len(request_line) < 3:
@@ -99,6 +102,18 @@ def handleRequest(request: str):
     }
     return request_dict
 
+def logResponse(response, response_size,client_address,request_dict):
+    with open("log.txt", "a") as file:
+        method = request_dict["METHOD"]
+        version = request_dict["HTTP_VERSION"]
+        url = request_dict["URL"]
+        code = response.split()[1]
+        client_ip = client_address[0]
+        timestamp = datetime.now().strftime("%d/%b/%Y:%H:%M:%S +0000")
+        
+        file.write(f'{client_ip} - - [{timestamp}] "{method} {url} {version}" {code} {response_size}\n')
+        
+
 server = serverSetup(80)
 while True:
     conn_socket,client_address = server.accept()
@@ -108,18 +123,22 @@ while True:
     try:
         request_dict = handleRequest(request)
         print('Request DEBUG', request_dict)
-        conn_socket.send(routing(request_dict["URL"]).encode())
+        
+        response = createResponse(request_dict["URL"])
+        response_packet = response.encode()
+        response_size = len(response_packet)
+        
+        logResponse(response, response_size, client_address, request_dict)
+        response_packet = response.encode()
+        
+        conn_socket.send(response_packet)
+        
     except Exception as error:
         print(error)
         conn_socket.send((RESPONSE_400_BAD_REQUEST).encode())                
     
     print("connection received from {}:{}".format(client_address[0],client_address[1]))
     print('RAW_RQUEST: ', request)
-
-    # try:
-    #     headers = makeHeaderDict(request)
-    # except IndexError:
-    #     conn_socket.send((RESPONSE_400_BAD_REQUEST+PAGE_NOT_FOUND).encode())
         
     # logging
     
