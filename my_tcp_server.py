@@ -135,7 +135,7 @@ def logResponse(response, response_size,client_address,request_dict):
         timestamp = datetime.now().strftime("%d/%b/%Y:%H:%M:%S +0000")
         
         file.write(f'{client_ip} - - [{timestamp}] "{method} {url} {version}" {code} {response_size}\n')
-        
+     
 
 server = serverSetup(80)
 while True:
@@ -157,7 +157,8 @@ while True:
         
     except Exception as error:
         print(error)
-        conn_socket.send((RESPONSE_400_BAD_REQUEST).encode())                
+        conn_socket.send((RESPONSE_400_BAD_REQUEST).encode())     
+        logResponse(RESPONSE_400_BAD_REQUEST,response_size,client_address,{'METHOD':None,'HTTP_VERSION':None,'URL':None,})           
     
     print("connection received from {}:{}".format(client_address[0],client_address[1]))
     print('RAW_RQUEST: ', request)
