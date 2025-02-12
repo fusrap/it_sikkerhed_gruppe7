@@ -21,15 +21,12 @@ with open('my_page.html', 'r', encoding='utf-8') as myPage:
 RESPONSE_404_NOT_FOUND_RESPONSE = RESPONSE_404_NOT_FOUND_HEADER + PAGE_NOT_FOUND
 
 
-def makeHeaderDict(request: str):
-    requestHeaders = request.split()
-    headerDict = {}
-    headerDict['METHOD'] = requestHeaders[0]
-    headerDict['URL'] = requestHeaders[1]
-    headerDict['VERSION'] = requestHeaders[2]
-    return headerDict
-
 def serverSetup(port: int): 
+    """
+    Opsætning af serveren socket
+    TCP = SOCK_STREAM
+    AF_INET = IPv4
+    """
     server_port = port
     server_socket = socket(AF_INET,SOCK_STREAM)
     server_socket.bind(('',server_port))
@@ -38,6 +35,11 @@ def serverSetup(port: int):
     return server_socket
 
 def createResponse(url:str):
+    """
+    Modtager en URL fra http request lines og returnere status+side.
+    Hvis siden ikke fundes returneres 404+PAGE_NOT_FOUND. 
+
+    """
     try:
         routes = {
             '/': RESPONSE_200_OK_HEADER + PAGE_HOME,
@@ -48,11 +50,14 @@ def createResponse(url:str):
         return routes[url]
     except:
         return RESPONSE_404_NOT_FOUND_RESPONSE
-    
-    # (response_text , code)
 
 
 def splitRequestLine(request_line):
+    """
+    input eksempel: request_line = ["GET", "/index.html", "HTTP/1.1"]
+    Denne metode tjekker om den først linje i request er valid.
+    Hvis alkle felter er valide returneres: method, url, version.
+    """
     if len(request_line) < 3:
         raise ValueError(f"Invalid HTTP request line: {' '.join(request_line)}")
 
@@ -71,6 +76,11 @@ def splitRequestLine(request_line):
     return method, url, version
 
 def splitHeader(headers: list):
+    """
+    Denne metoder modtager alle resterne header, som bliver sent i et Key: value format.
+    Eksempel på andre headers: headers = ['Host: localhost', 'Connection: keep-alive', 'Cache-Control: max-age=0'....]
+    De samles og retuneres i en dict {}.
+    """
     header_dict = {}
     for header in headers:
         if ': ' in header:
@@ -78,10 +88,20 @@ def splitHeader(headers: list):
             header_dict[key] = value
     return header_dict, None  
 
+"""
+Validere om et request er valid og opdelere requestet i et dict efter:
+    request_dict = {
+        'METHOD': method,
+        'URL': url,
+        'HTTP_VERSION': version,
+        'HEADERS': headers_lines,
+        'BODY': body
+    }
+"""
 def handleRequest(request: str):
     headers_lines = request.split('\r\n')
 
-    if not headers_lines or len(headers_lines) < 1 or headers_lines[0].strip() == '':
+    if not headers_lines or headers_lines[0].strip() == '':
         raise ValueError("Received an empty or malformed HTTP request")
 
     request_line = headers_lines[0].split()
@@ -103,6 +123,9 @@ def handleRequest(request: str):
     return request_dict
 
 def logResponse(response, response_size,client_address,request_dict):
+    """
+    Opretter en log fil og logger.
+    """
     with open("log.txt", "a") as file:
         method = request_dict["METHOD"]
         version = request_dict["HTTP_VERSION"]
@@ -119,7 +142,6 @@ while True:
     conn_socket,client_address = server.accept()
     request = conn_socket.recv(2048).decode()
     
-    # validate request
     try:
         request_dict = handleRequest(request)
         print('Request DEBUG', request_dict)
@@ -140,8 +162,5 @@ while True:
     print("connection received from {}:{}".format(client_address[0],client_address[1]))
     print('RAW_RQUEST: ', request)
         
-    # logging
-    
-
 server_socket.close()
 conn_socket.close()
