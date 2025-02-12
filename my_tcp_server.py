@@ -157,8 +157,9 @@ while True:
         
     except Exception as error:
         print(error)
-        conn_socket.send((RESPONSE_400_BAD_REQUEST).encode())     
-        logResponse(RESPONSE_400_BAD_REQUEST,response_size,client_address,{'METHOD':None,'HTTP_VERSION':None,'URL':None,})           
+        response_packet = (RESPONSE_400_BAD_REQUEST + "<html><body>400 Bad Request</body></html>").encode()
+        conn_socket.send(response_packet)
+        logResponse(RESPONSE_400_BAD_REQUEST,len(response_packet),client_address,{'METHOD':None,'HTTP_VERSION':None,'URL':None,})           
     
     print("connection received from {}:{}".format(client_address[0],client_address[1]))
     print('RAW_RQUEST: ', request)
