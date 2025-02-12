@@ -162,6 +162,3 @@ while True:
     
     print("connection received from {}:{}".format(client_address[0],client_address[1]))
     print('RAW_RQUEST: ', request)
-        
-server_socket.close()
-conn_socket.close()
